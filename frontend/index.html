@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Recruitment Portal - API Simulator</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <!-- Fallback to relative style.css when opening file directly -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Floating Toast Notifications -->
+  <div id="toast-container"></div>
+
+  <!-- Header Navigation -->
+  <header>
+    <div class="navbar">
+      <a href="#" class="logo">
+        💼 JobPortal <span>DRF API</span>
+      </a>
+
+      <nav class="nav-links">
+        <button class="nav-btn active" data-tab="explore-jobs">🔍 Explore Jobs</button>
+        <button class="nav-btn nav-employer-only" data-tab="post-job" style="display:none;">➕ Post a Job</button>
+        <button class="nav-btn nav-employer-only" data-tab="employer-jobs" style="display:none;">📋 My Posted Jobs</button>
+        <button class="nav-btn nav-candidate-only" data-tab="my-applications" style="display:none;">📄 My Applications</button>
+      </nav>
+
+      <div class="nav-auth">
+        <!-- Logged Out View -->
+        <div id="auth-section" style="display:flex; gap:0.5rem;">
+          <button class="btn btn-secondary btn-sm" id="btn-open-login">Sign In</button>
+          <button class="btn btn-primary btn-sm" id="btn-open-register">Register</button>
+        </div>
+
+        <!-- Logged In View -->
+        <div id="user-section" style="display:none; align-items:center; gap:0.75rem;">
+          <div class="user-badge">
+            👤 <span id="user-name-badge" style="font-weight:600;">Username</span>
+            <span id="user-role-badge" class="role-tag candidate">CANDIDATE</span>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="btn-logout">Logout</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container">
+    
+    <!-- Hero & Quick Demo Switcher -->
+    <section class="hero">
+      <div>
+        <h1>Find Your Next Role or Hire Top Talent</h1>
+        <p>A full-stack API simulation for Candidates and Employers powered by Django, Django REST Framework, and SimpleJWT.</p>
+      </div>
+      <div class="hero-quick-demo">
+        <p>⚡ 1-Click Demo Evaluation:</p>
+        <div class="demo-buttons">
+          <button class="btn btn-sm btn-secondary" id="btn-demo-candidate" title="Log in as demo candidate">
+            👤 Candidate Mode
+          </button>
+          <button class="btn btn-sm btn-secondary" id="btn-demo-employer" title="Log in as demo employer">
+            🏢 Employer Mode
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 1: Explore & Search Jobs -->
+    <section id="tab-explore-jobs" class="tab-content active">
+      <div class="filter-card">
+        <form id="filter-form">
+          <div class="filter-grid">
+            <div class="form-group">
+              <label for="filter-search">Keyword / Title / Company</label>
+              <input type="text" id="filter-search" placeholder="e.g. Django, Senior Developer">
+            </div>
+
+            <div class="form-group">
+              <label for="filter-location">Location</label>
+              <input type="text" id="filter-location" placeholder="e.g. Remote, New York">
+            </div>
+
+            <div class="form-group">
+              <label for="filter-skills">Required Skills</label>
+              <input type="text" id="filter-skills" placeholder="e.g. Python, Docker">
+            </div>
+
+            <div class="form-group">
+              <label for="filter-job-type">Job Type</label>
+              <select id="filter-job-type">
+                <option value="">All Types</option>
+                <option value="FULL_TIME">Full-time</option>
+                <option value="PART_TIME">Part-time</option>
+                <option value="CONTRACT">Contract</option>
+                <option value="INTERNSHIP">Internship</option>
+                <option value="REMOTE">Remote</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="filter-min-salary">Min Salary ($)</label>
+              <input type="number" id="filter-min-salary" placeholder="e.g. 80000">
+            </div>
+
+            <div style="display:flex; gap:0.5rem;">
+              <button type="submit" class="btn btn-primary" style="flex:1;">Search</button>
+              <button type="button" class="btn btn-secondary" id="btn-reset-filters">Reset</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Job Cards Container -->
+      <div id="jobs-container" class="job-grid">
+        <!-- Populated dynamically by app.js -->
+      </div>
+    </section>
+
+    <!-- Tab 2: Post a Job (Employer Only) -->
+    <section id="tab-post-job" class="tab-content">
+      <div class="form-card">
+        <h2>Post a New Job Opportunity</h2>
+        <p class="subtitle">Fill out the details below to create a vacancy and start receiving applications.</p>
+
+        <form id="form-post-job">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="post-title">Job Title *</label>
+              <input type="text" id="post-title" required placeholder="e.g. Senior Backend Engineer">
+            </div>
+            <div class="form-group">
+              <label for="post-company">Company Name</label>
+              <input type="text" id="post-company" placeholder="e.g. Acme Innovations">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="post-location">Location *</label>
+              <input type="text" id="post-location" required placeholder="e.g. Remote / San Francisco, CA">
+            </div>
+            <div class="form-group">
+              <label for="post-job-type">Job Type *</label>
+              <select id="post-job-type" required>
+                <option value="FULL_TIME">Full-time</option>
+                <option value="PART_TIME">Part-time</option>
+                <option value="CONTRACT">Contract</option>
+                <option value="INTERNSHIP">Internship</option>
+                <option value="REMOTE">Remote</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="post-experience">Experience Level</label>
+              <select id="post-experience">
+                <option value="ENTRY">Entry Level</option>
+                <option value="MID" selected>Mid Level</option>
+                <option value="SENIOR">Senior Level</option>
+                <option value="LEAD">Lead / Executive</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="post-skills">Skills Required * (comma-separated)</label>
+              <input type="text" id="post-skills" required placeholder="e.g. Python, Django, REST APIs, PostgreSQL">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="post-salary-min">Minimum Salary ($/year)</label>
+              <input type="number" id="post-salary-min" placeholder="e.g. 90000">
+            </div>
+            <div class="form-group">
+              <label for="post-salary-max">Maximum Salary ($/year)</label>
+              <input type="number" id="post-salary-max" placeholder="e.g. 130000">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:1.5rem;">
+            <label for="post-description">Job Description & Responsibilities *</label>
+            <textarea id="post-description" rows="5" required placeholder="Describe the role requirements, responsibilities, and benefits..."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width:100%;">🚀 Publish Job Posting</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Tab 3: My Posted Jobs & Manage Applicants (Employer Only) -->
+    <section id="tab-employer-jobs" class="tab-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+        <div>
+          <h2>Your Posted Jobs</h2>
+          <p style="color:var(--text-muted); font-size:0.9rem;">Review applicant submissions, track metrics, and manage hiring statuses.</p>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="switchTab('post-job')">➕ Post New Job</button>
+      </div>
+
+      <div id="employer-jobs-container">
+        <!-- Populated dynamically by app.js -->
+      </div>
+    </section>
+
+    <!-- Tab 4: My Applications (Candidate Only) -->
+    <section id="tab-my-applications" class="tab-content">
+      <div style="margin-bottom:1.25rem;">
+        <h2>My Submitted Applications</h2>
+        <p style="color:var(--text-muted); font-size:0.9rem;">Track real-time updates on your job applications.</p>
+      </div>
+
+      <div id="candidate-applications-container">
+        <!-- Populated dynamically by app.js -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Live API Request Inspector (Bottom Dock) -->
+  <aside class="api-inspector">
+    <div class="api-inspector-toggle" id="inspector-toggle">
+      <span>📡 Live DRF API Telemetry & Response Inspector</span>
+      <div style="display:flex; gap:1rem; align-items:center;">
+        <button class="btn btn-secondary btn-sm" id="btn-clear-logs" style="font-size:0.7rem; padding:0.15rem 0.5rem; background:#334155; color:white; border:none;">Clear Logs</button>
+        <span id="inspector-icon">▲</span>
+      </div>
+    </div>
+    <div class="api-inspector-body" id="inspector-body">
+      <div id="api-logs">
+        <div class="empty-state" style="padding:1rem;">Ready. Perform any search, login, or application action to inspect real-time REST API requests.</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- 1. Sign In Modal -->
+  <div class="modal-overlay" id="modal-login">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Sign In</h3>
+        <button class="btn-close">&times;</button>
+      </div>
+      <form id="form-login">
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label for="login-username">Username</label>
+          <input type="text" id="login-username" required placeholder="Enter your username">
+        </div>
+        <div class="form-group" style="margin-bottom:1.5rem;">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" required placeholder="Enter password">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;">Sign In with JWT</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. Register Modal -->
+  <div class="modal-overlay" id="modal-register">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Create Account</h3>
+        <button class="btn-close">&times;</button>
+      </div>
+      <form id="form-register">
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label for="reg-role">Account Type / Role *</label>
+          <select id="reg-role" required>
+            <option value="CANDIDATE">Candidate (Search & Apply for Jobs)</option>
+            <option value="EMPLOYER">Employer (Post Jobs & Hire Applicants)</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label for="reg-username">Username *</label>
+          <input type="text" id="reg-username" required placeholder="Choose a username">
+        </div>
+
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label for="reg-email">Email Address *</label>
+          <input type="email" id="reg-email" required placeholder="e.g. alex@example.com">
+        </div>
+
+        <div class="form-group" id="reg-company-group" style="display:none; margin-bottom:1rem;">
+          <label for="reg-company">Company Name</label>
+          <input type="text" id="reg-company" placeholder="e.g. Apex Tech">
+        </div>
+
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label for="reg-password">Password *</label>
+          <input type="password" id="reg-password" required placeholder="At least 8 characters">
+        </div>
+
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label for="reg-password-confirm">Confirm Password *</label>
+          <input type="password" id="reg-password-confirm" required placeholder="Repeat password">
+        </div>
+
+        <div class="form-group" style="margin-bottom:1.5rem;">
+          <label for="reg-bio">Bio / Professional Summary</label>
+          <textarea id="reg-bio" rows="2" placeholder="Brief summary..."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width:100%;">Register Account</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Job Apply Modal -->
+  <div class="modal-overlay" id="modal-apply">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h3>Apply for Job</h3>
+          <p id="apply-job-title" style="font-size:0.85rem; color:var(--primary); font-weight:600;"></p>
+        </div>
+        <button class="btn-close">&times;</button>
+      </div>
+      <form id="form-apply-job">
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label for="apply-resume-url">Resume / Portfolio Link</label>
+          <input type="url" id="apply-resume-url" placeholder="https://linkedin.com/in/... or Google Drive link">
+        </div>
+
+        <div class="form-group" style="margin-bottom:1.5rem;">
+          <label for="apply-cover-letter">Cover Note / Why you are a great fit</label>
+          <textarea id="apply-cover-letter" rows="4" placeholder="Highlight your relevant experience and motivation..."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-success" style="width:100%;">Submit Application</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. Employer Applicants Review Modal -->
+  <div class="modal-overlay" id="modal-applicants">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <div>
+          <h3>Job Applicants Review</h3>
+          <p id="applicants-job-title" style="font-size:0.85rem; color:var(--primary); font-weight:600;"></p>
+        </div>
+        <button class="btn-close">&times;</button>
+      </div>
+      <div id="applicants-list-container">
+        <!-- Populated dynamically by app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/static/app.js"></script>
+  <!-- Fallback to relative app.js when opening file directly -->
+  <script src="app.js"></script>
+</body>
+</html>

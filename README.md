@@ -1,30 +1,37 @@
-# Job Recruitment REST API (Django + DRF)
+# Job Recruitment REST API & Interactive Simulator (Django + DRF + Plain Vanilla JS)
 
-A production-ready Job Recruitment REST API built with **Django**, **Django REST Framework (DRF)**, and **SimpleJWT** for role-based job recruitment, application tracking, search & filtering, and status lifecycle management.
+A production-ready Job Recruitment REST API built with **Django**, **Django REST Framework (DRF)**, **SimpleJWT**, and an **Interactive Frontend Simulator** built with plain **HTML5, CSS, and Vanilla JavaScript**.
 
 ---
 
-## Features
+## Key Features
 
+- **Interactive Frontend UI**:
+  - Browse, search, and filter job postings with instant updates.
+  - Role-based views for **Candidate** and **Employer**.
+  - 1-Click Demo Mode (Instant switch between Candidate & Employer profiles).
+  - Apply for jobs with resume links and cover notes.
+  - Employer applicant review dashboard with live status updates (`Applied`, `Shortlisted`, `Hired`, `Rejected`).
+  - **Live API Telemetry & Response Inspector** docked at the bottom showing exact REST requests and responses in real time.
 - **JWT Authentication**: Secure user registration and login issuing JSON Web Tokens (access & refresh).
 - **Role-Based Access Control (RBAC)**:
-  - **Employer**: Post jobs, update/delete own jobs, view applicants for posted jobs, and update application statuses (`Applied`, `Shortlisted`, `Rejected`, `Hired`).
-  - **Candidate**: Browse and search active jobs, submit applications with resume and cover note, and track application status.
-- **Duplicate Prevention**: Database constraints and serializer validation prevent a candidate from applying to the same job multiple times.
+  - **Employer**: Post jobs, update/delete own jobs, view applicants for posted jobs, and update application statuses.
+  - **Candidate**: Browse and search active jobs, submit applications, and track application statuses.
+- **Duplicate Prevention**: Database constraints and serializer validation prevent candidates from applying to the same job multiple times.
 - **Search & Filtering**: Search jobs by title, skills, description, company name, location, and filter by job type, experience level, and salary range.
-- **PostgreSQL Ready**: Configured for PostgreSQL in production/development with seamless fallback to SQLite.
+- **PostgreSQL Ready**: Configured for PostgreSQL with automatic fallback to SQLite for local development.
 - **Automated Test Suite**: 32 comprehensive tests covering authentication, RBAC permissions, job CRUD, filtering, applications, and status workflows.
 
 ---
 
 ## Tech Stack
 
-- **Framework**: Django 5.x
-- **API Toolkit**: Django REST Framework (DRF)
-- **Authentication**: `djangorestframework-simplejwt`
+- **Backend**: Python 3.11+, Django 5.x, Django REST Framework
+- **Authentication**: SimpleJWT (`djangorestframework-simplejwt`)
 - **Filtering**: `django-filter`
-- **Database**: PostgreSQL (preferred) / SQLite
-- **Environment Management**: `python-dotenv`
+- **CORS**: `django-cors-headers`
+- **Database**: PostgreSQL / SQLite
+- **Frontend**: Plain HTML5, Modern CSS (custom properties, responsive grid/flexbox), Vanilla JavaScript (ES6+ `fetch` API)
 
 ---
 
@@ -36,9 +43,15 @@ A production-ready Job Recruitment REST API built with **Django**, **Django REST
 ├── .env.example
 ├── .gitignore
 ├── README.md
+├── frontend/                # Interactive Plain HTML/CSS/JS Frontend
+│   ├── index.html           # Single-page UI
+│   ├── style.css            # Modern responsive CSS design
+│   └── app.js               # Client-side state & API communication
+├── templates/
+│   └── index.html           # Django template integration
 ├── config/                  # Django project configuration
 │   ├── settings.py          # DRF, SimpleJWT, DB & app configuration
-│   ├── urls.py              # Root routing & API index
+│   ├── urls.py              # Root routing & frontend serving
 │   └── wsgi.py
 ├── accounts/                # User management & authentication
 │   ├── models.py            # Custom User model (role: EMPLOYER | CANDIDATE)
@@ -66,35 +79,15 @@ A production-ready Job Recruitment REST API built with **Django**, **Django REST
 
 ---
 
-## Setup & Installation
+## Setup & Running the Application
 
-### 1. Clone the repository / Navigate to the folder
-
-```bash
-cd "Job portal"
-```
-
-### 2. Create and activate a virtual environment
-
-**Windows (PowerShell):**
-```powershell
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-```
-
-**macOS / Linux:**
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
-### 3. Install dependencies
+### 1. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configure environment variables
+### 2. Configure environment variables (Optional)
 
 Copy `.env.example` to `.env`:
 
@@ -102,44 +95,40 @@ Copy `.env.example` to `.env`:
 cp .env.example .env
 ```
 
-Edit `.env` to configure your settings.
+> **Note**: Defaults to SQLite out-of-the-box if no PostgreSQL credentials are provided.
 
-#### PostgreSQL Configuration (Recommended)
-```env
-SECRET_KEY=your-secret-key
-DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1
-
-DB_ENGINE=django.db.backends.postgresql
-DB_NAME=job_portal_db
-DB_USER=postgres
-DB_PASSWORD=your_password
-DB_HOST=localhost
-DB_PORT=5432
-```
-
-> **Note**: If `DB_NAME` is not set or `USE_SQLITE=True`, the project automatically falls back to SQLite (`db.sqlite3`), requiring no database setup.
-
-### 5. Run Database Migrations
+### 3. Run Database Migrations
 
 ```bash
 python manage.py makemigrations
 python manage.py migrate
 ```
 
-### 6. Create a Superuser (Optional - for Django Admin)
-
-```bash
-python manage.py createsuperuser
-```
-
-### 7. Run the Development Server
+### 4. Start the Development Server
 
 ```bash
 python manage.py runserver
 ```
 
-The server will start at `http://127.0.0.1:8000/`.
+### 5. Access the Interactive Frontend & APIs
+
+- **Interactive Web App**: Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) in any browser.
+- **REST API Directory**: [http://127.0.0.1:8000/api/](http://127.0.0.1:8000/api/)
+- **Django Admin**: [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/)
+
+---
+
+## Using the Frontend Simulator
+
+1. **Quick Evaluation**:
+   - Click **`👤 Candidate Mode`** in the top hero bar to instantly log in as a candidate, browse jobs, search by skill/salary, and submit an application.
+   - Click **`🏢 Employer Mode`** to instantly log in as an employer, publish new jobs, and review/shortlist/hire applicants.
+2. **Testing Duplicate Application Prevention**:
+   - As a Candidate, apply for a job once.
+   - Attempt to click "Apply Now" on the same job again.
+   - Notice the API responds with `400 Bad Request` and displays: *"You have already applied for this job."*
+3. **Live API Telemetry**:
+   - Open the **"Live DRF API Telemetry & Response Inspector"** at the bottom of the screen to inspect every HTTP request method, URL, headers, and JSON response payload in real time.
 
 ---
 
@@ -304,17 +293,6 @@ Content-Type: application/json
 }
 ```
 
-**Duplicate Application Prevention:**
-If the candidate tries to apply again to the same job, the API returns:
-```json
-{
-  "non_field_errors": [
-    "You have already applied for this job."
-  ]
-}
-```
-*(Status: `400 Bad Request`)*
-
 #### Update Application Status (Employer Only)
 ```http
 PATCH /api/applications/1/status/
@@ -327,50 +305,5 @@ Content-Type: application/json
 ```
 *Allowed status values*: `APPLIED`, `SHORTLISTED`, `REJECTED`, `HIRED`
 
-**Response (200 OK):**
-```json
-{
-  "message": "Application status updated to 'SHORTLISTED'.",
-  "application": {
-    "id": 1,
-    "job_id": 1,
-    "job_title": "Senior Python/Django Developer",
-    "company_name": "Tech Corp Inc.",
-    "candidate_id": 2,
-    "candidate_username": "john_dev",
-    "candidate_email": "john@example.com",
-    "resume_url": "https://linkedin.com/in/johndoe",
-    "cover_letter": "I have 5+ years of experience...",
-    "status": "SHORTLISTED",
-    "applied_at": "2026-09-01T17:00:00Z",
-    "updated_at": "2026-09-01T17:05:00Z"
-  }
-}
-```
-
 ---
 
-## Application Status Workflow
-
-```mermaid
-stateDiagram-v2
-    [*] --> APPLIED : Candidate applies
-    APPLIED --> SHORTLISTED : Employer reviews
-    APPLIED --> REJECTED : Employer reviews
-    SHORTLISTED --> HIRED : Employer makes offer
-    SHORTLISTED --> REJECTED : Employer declines
-```
-
----
-
-## Summary of Permissions
-
-| Action | Candidate | Employer (Owner) | Employer (Non-Owner) | Anonymous |
-|---|:---:|:---:|:---:|:---:|
-| Browse & Search Jobs | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| Create Job | :x: (403) | :white_check_mark: | :white_check_mark: | :x: (401) |
-| Edit/Delete Job | :x: (403) | :white_check_mark: | :x: (403) | :x: (401) |
-| Apply for Job | :white_check_mark: | :x: (403) | :x: (403) | :x: (401) |
-| View Own Applications | :white_check_mark: | :x: (403) | :x: (403) | :x: (401) |
-| View Job Applicants | :x: (403) | :white_check_mark: | :x: (403) | :x: (401) |
-| Update Applicant Status | :x: (403) | :white_check_mark: | :x: (403) | :x: (401) |
